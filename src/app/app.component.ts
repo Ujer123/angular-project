@@ -165,15 +165,33 @@ export class AppComponent implements OnInit {
       (product) => product.id === this.selectedProduct.id
     );
   
-    // Update the product in the list
     if (index !== -1) {
-      this.products[index] = { ...this.newTask };
-      this.filteredProducts = [...this.products]; // Update the filtered list
-    }
+      // Send updated data to the backend
+      this.http
+        .put(
+          `https://task-backend-tfp7.onrender.com/products/${this.selectedProduct.id}`,
+          this.newTask
+        )
+        .subscribe(
+          (response) => {
+            console.log('Task updated:', response);
   
-    // Close the modal
-    this.closeModal();
+            // Update the local product list after successful update
+            this.products[index] = { ...this.newTask };
+            this.filteredProducts = [...this.products];
+  
+            // Close the modal
+            this.closeModal();
+          },
+          (error) => {
+            console.error('Error updating task:', error);
+          }
+        );
+    } else {
+      console.error('Task not found for editing');
+    }
   }
+  
   toggleStatus(product: any) {
     // Toggle the status between 'Open' and 'Closed'
     const newStatus = product.status === 'Open' ? 'Closed' : 'Open';
@@ -194,11 +212,11 @@ export class AppComponent implements OnInit {
   
   
   
-  editTask(product: any) {
-    this.selectedProduct = { ...product }; // Clone the selected product
-    this.newTask = { ...product }; // Populate the modal fields with the selected product's data
-    this.isModalOpen = true; // Open the modal for editing
-  }
+    editTask(product: any) {
+      this.selectedProduct = { ...product }; // Clone the selected product
+      this.newTask = { ...product }; // Populate the modal fields with the selected product's data
+      this.isModalOpen = true; // Open the modal for editing
+    }
   
 
   duplicateTask(product: any) {
